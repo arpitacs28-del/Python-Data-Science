@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register to Bid — Auction House</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1216;
+    --ink-soft:#171b21;
+    --ink-line: rgba(242,237,226,0.10);
+    --ivory:#f4f0e6;
+    --ivory-dim:#e9e3d3;
+    --gold:#c9a227;
+    --gold-bright:#e8c766;
+    --gold-dim:#8a6d1f;
+    --muted:#9a9488;
+    --error:#c4553f;
+    --ok:#5c8a5c;
+    --radius: 3px;
+    --ease: cubic-bezier(.16,.8,.24,1);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--ink);
+    color:var(--ivory);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--gold); color:var(--ink); }
+
+  a{ color:inherit; }
+
+  .wrap{
+    display:grid;
+    grid-template-columns: 1.05fr 1fr;
+    min-height:100vh;
+  }
+
+  /* ---------- LEFT: SHOWCASE PANEL ---------- */
+  .showcase{
+    position:relative;
+    background:
+      radial-gradient(ellipse 900px 600px at 15% 8%, rgba(201,162,39,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 95%, rgba(201,162,39,0.06), transparent 55%),
+      var(--ink);
+    padding:56px 64px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow:hidden;
+    border-right:1px solid var(--ink-line);
+  }
+  .showcase::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(242,237,226,0.02) 0px, transparent 1px, transparent 2px, rgba(242,237,226,0.02) 3px);
+    opacity:.4;
+    pointer-events:none;
+  }
+
+  .brand{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    z-index:2;
+  }
+  .brand-mark{
+    width:34px; height:34px;
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-size:15px;
+    color:var(--gold-bright);
+    flex-shrink:0;
+  }
+  .brand-name{
+    font-family:'Space Mono', monospace;
+    letter-spacing:.14em;
+    font-size:12.5px;
+    text-transform:uppercase;
+    color:var(--ivory-dim);
+  }
+  .brand-name span{ color:var(--gold); }
+
+  .showcase-copy{
+    position:relative;
+    z-index:2;
+    max-width:460px;
+    margin-top:40px;
+  }
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--gold);
+  }
+  h1.showcase-title{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:clamp(34px, 3.6vw, 46px);
+    line-height:1.08;
+    letter-spacing:-0.01em;
+    margin:0 0 20px;
+    color:var(--ivory);
+  }
+  h1.showcase-title em{
+    font-style:italic;
+    color:var(--gold-bright);
+    font-weight:500;
+  }
+  .showcase-sub{
+    font-size:15px;
+    line-height:1.65;
+    color:var(--muted);
+    margin:0;
+  }
+
+  /* Signature element: live lot ticket */
+  .lot-ticket{
+    position:relative;
+    z-index:2;
+    margin-top:44px;
+    background:linear-gradient(180deg, rgba(242,237,226,0.045), rgba(242,237,226,0.015));
+    border:1px solid var(--ink-line);
+    border-radius: var(--radius);
+    padding:22px 24px;
+    max-width:420px;
+    backdrop-filter: blur(2px);
+  }
+  .lot-ticket-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .lot-ticket-top .live{
+    color:var(--gold-bright);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .live-dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--gold-bright);
+    animation:pulse 1.6s infinite ease-in-out;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:.35; transform:scale(.75); }
+  }
+  .lot-title{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    color:var(--ivory);
+    margin:0 0 16px;
+  }
+  .lot-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+  }
+  .lot-bid-label{
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .lot-bid-amount{
+    font-family:'Space Mono', monospace;
+    font-size:26px;
+    color:var(--gold-bright);
+    font-weight:700;
+    font-variant-numeric: tabular-nums;
+  }
+  .lot-timer{
+    font-family:'Space Mono', monospace;
+    font-size:18px;
+    color:var(--ivory-dim);
+    font-variant-numeric: tabular-nums;
+    text-align:right;
+  }
+  .lot-timer-label{
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+    text-align:right;
+  }
+
+  .showcase-foot{
+    position:relative;
+    z-index:2;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    display:flex;
+    gap:28px;
+  }
+  .showcase-foot strong{ color:var(--ivory-dim); font-weight:400; }
+
+  /* ---------- particles + spotlight + reveal + live lots ---------- */
+  .particle-field{
+    position:absolute; inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:1;
+  }
+  .particle{
+    position:absolute;
+    bottom:-10px;
+    width:3px; height:3px;
+    border-radius:50%;
+    background:var(--gold-bright);
+    opacity:0;
+    box-shadow:0 0 6px 1px rgba(232,199,102,0.6);
+    animation:drift linear infinite;
+  }
+  @keyframes drift{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    8%{ opacity:.7; }
+    92%{ opacity:.5; }
+    100%{ transform:translateY(-620px) translateX(var(--dx,20px)); opacity:0; }
+  }
+
+  .spotlight{
+    position:absolute; inset:0;
+    z-index:1;
+    pointer-events:none;
+    background: radial-gradient(320px circle at var(--mx,50%) var(--my,20%), rgba(201,162,39,0.14), transparent 65%);
+    transition:opacity .3s;
+    opacity:0;
+  }
+  .showcase:hover .spotlight{ opacity:1; }
+
+  .reveal{
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity .7s var(--ease), transform .7s var(--ease);
+  }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  .shimmer-text{
+    background:linear-gradient(100deg, var(--ivory) 30%, var(--gold-bright) 42%, var(--ivory) 54%);
+    background-size:220% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:shimmer 5s ease-in-out infinite;
+    animation-delay:1.2s;
+  }
+  @keyframes shimmer{
+    0%{ background-position:180% 0; }
+    35%{ background-position:-40% 0; }
+    100%{ background-position:-40% 0; }
+  }
+
+  .live-lots{
+    position:relative;
+    z-index:2;
+    display:flex;
+    gap:12px;
+    margin-top:22px;
+  }
+  .lot-tile{
+    flex:1;
+    background:linear-gradient(155deg, rgba(242,237,226,0.055), rgba(242,237,226,0.015));
+    border:1px solid var(--ink-line);
+    border-radius:var(--radius);
+    padding:14px 12px;
+    text-align:center;
+    transition:transform .25s var(--ease), border-color .25s;
+  }
+  .lot-tile:hover{
+    transform:translateY(-4px);
+    border-color:rgba(201,162,39,0.4);
+  }
+  .lot-tile svg{
+    width:26px; height:26px;
+    margin-bottom:10px;
+    stroke:var(--gold-bright);
+  }
+  .lot-tile .tile-name{
+    font-family:'Space Mono', monospace;
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .lot-tile .tile-bid{
+    font-family:'Space Mono', monospace;
+    font-size:13px;
+    color:var(--ivory-dim);
+    font-weight:700;
+  }
+
+  /* ---------- RIGHT: FORM PANEL ---------- */
+  .form-panel{
+    background:var(--ivory);
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:56px 48px;
+  }
+  .form-inner{
+    width:100%;
+    max-width:400px;
+  }
+
+  .paddle-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    background:rgba(201,162,39,0.10);
+    border:1px solid rgba(201,162,39,0.35);
+    padding:6px 12px;
+    border-radius:20px;
+    margin-bottom:26px;
+    opacity:0;
+    transform:translateY(-4px);
+    transition:opacity .5s var(--ease), transform .5s var(--ease);
+  }
+  .paddle-badge.show{ opacity:1; transform:translateY(0); }
+  .paddle-badge .num{ color:var(--gold-dim); font-weight:700; }
+
+  .form-head h2{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:30px;
+    margin:0 0 8px;
+    letter-spacing:-0.01em;
+  }
+  .form-head p{
+    margin:0 0 32px;
+    font-size:14px;
+    color:#6b6559;
+    line-height:1.55;
+  }
+  .form-head p a{
+    color:var(--gold-dim);
+    font-weight:600;
+    text-decoration:none;
+    border-bottom:1px solid rgba(138,109,31,0.4);
+  }
+  .form-head p a:hover{ border-color:var(--gold-dim); }
+
+  form{ display:flex; flex-direction:column; gap:18px; }
+
+  .field{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+  .field-label{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:#8a8374;
+    margin-bottom:7px;
+  }
+  .field-label .idx{ color:var(--gold-dim); }
+
+  .field-row{ display:flex; gap:12px; }
+  .field-row .field{ flex:1; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"]{
+    font-family:'Inter', sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:#fffdf9;
+    border:1px solid #d9d2c1;
+    border-radius:2px;
+    padding:12px 14px;
+    outline:none;
+    transition:border-color .2s, box-shadow .2s;
+    width:100%;
+  }
+  input::placeholder{ color:#b3ab99; }
+  input:focus{
+    border-color:var(--gold-dim);
+    box-shadow:0 0 0 3px rgba(201,162,39,0.14);
+  }
+  input.invalid{
+    border-color:var(--error);
+  }
+  input.invalid:focus{
+    box-shadow:0 0 0 3px rgba(196,85,63,0.14);
+  }
+
+  .field-msg{
+    font-size:11.5px;
+    margin-top:6px;
+    min-height:14px;
+    color:var(--error);
+    font-family:'Inter', sans-serif;
+  }
+  .field-msg.ok{ color:var(--ok); }
+
+  .pw-wrap{ position:relative; }
+  .pw-toggle{
+    position:absolute;
+    right:12px; top:50%;
+    transform:translateY(-50%);
+    background:none; border:none;
+    cursor:pointer;
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:#8a8374;
+    padding:4px;
+  }
+  .pw-toggle:hover{ color:var(--gold-dim); }
+
+  .strength{
+    display:flex;
+    gap:4px;
+    margin-top:8px;
+  }
+  .strength i{
+    flex:1;
+    height:3px;
+    background:#e4ddc9;
+    border-radius:2px;
+    transition:background .25s;
+  }
+  .strength[data-level="1"] i:nth-child(1){ background:var(--error); }
+  .strength[data-level="2"] i:nth-child(-n+2){ background:#c98a27; }
+  .strength[data-level="3"] i:nth-child(-n+3){ background:#a4a327; }
+  .strength[data-level="4"] i{ background:var(--ok); }
+
+  .terms{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    font-size:12.5px;
+    color:#6b6559;
+    line-height:1.5;
+    margin-top:4px;
+  }
+  .terms input{ margin-top:3px; accent-color:var(--gold-dim); }
+  .terms a{ color:var(--gold-dim); text-decoration:underline; }
+
+  .submit-btn{
+    position:relative;
+    margin-top:8px;
+    background:var(--ink);
+    color:var(--ivory);
+    border:none;
+    padding:14px 20px;
+    font-family:'Space Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    border-radius:2px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:transform .15s var(--ease), background .2s;
+  }
+  .submit-btn:hover{ background:#22262e; }
+  .submit-btn:active{ transform:scale(.98); }
+  .submit-btn::after{
+    content:"";
+    position:absolute;
+    top:0; left:-40%;
+    width:30%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(232,199,102,0.25), transparent);
+    transform:skewX(-20deg);
+    transition:left .5s var(--ease);
+  }
+  .submit-btn:hover::after{ left:130%; }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:26px 0 18px;
+    color:#b3ab99;
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:#e4ddc9;
+  }
+
+  .signin-line{
+    text-align:center;
+    font-size:13.5px;
+    color:#6b6559;
+    margin-top:22px;
+  }
+  .signin-line a{
+    color:var(--gold-dim);
+    font-weight:600;
+    text-decoration:none;
+    border-bottom:1px solid rgba(138,109,31,0.4);
+  }
+
+  @media (max-width: 920px){
+    .wrap{ grid-template-columns: 1fr; }
+    .showcase{ display:none; }
+    .form-panel{ padding:40px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- LEFT: SHOWCASE -->
+  <section class="showcase" id="showcasePanel">
+    <div class="particle-field" id="particleField"></div>
+    <div class="spotlight"></div>
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-name">AUCTA<span>·</span>HOUSE</div>
+    </div>
+
+    <div class="showcase-copy">
+      <div class="eyebrow reveal">Bidder Registration</div>
+      <h1 class="showcase-title reveal">Every bid<br><em class="shimmer-text">tells a story.</em></h1>
+      <p class="showcase-sub reveal">Register a bidder account to track live lots, place bids in real time, and get notified the moment you're outbid.</p>
+    </div>
+
+    <div class="live-lots reveal">
+      <div class="lot-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"></circle><path d="M9 3h6M12 6v2M12 13l3-2"></path></svg>
+        <div class="tile-name">Timepiece</div>
+        <div class="tile-bid">$4,200</div>
+      </div>
+      <div class="lot-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l3 5-9 13L3 8z"></path><path d="M3 8h18M9 3l3 5 3-5M9 8l3 13 3-13"></path></svg>
+        <div class="tile-name">Fine Gem</div>
+        <div class="tile-bid">$9,850</div>
+      </div>
+      <div class="lot-tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l1 6-4 3 2 8H8l2-8-4-3z"></path></svg>
+        <div class="tile-name">Ceramic Urn</div>
+        <div class="tile-bid">$1,675</div>
+      </div>
+    </div>
+
+    <div class="lot-ticket reveal">
+      <div class="lot-ticket-top">
+        <span>Lot №0417</span>
+        <span class="live"><span class="live-dot"></span>Live now</span>
+      </div>
+      <p class="lot-title">1962 Vintage Chronograph, Steel Case</p>
+      <div class="lot-meta">
+        <div>
+          <div class="lot-bid-label">Current bid</div>
+          <div class="lot-bid-amount" id="tickerAmount">$4,200</div>
+        </div>
+        <div>
+          <div class="lot-timer-label">Closes in</div>
+          <div class="lot-timer" id="tickerTimer">02:41</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase-foot">
+      <span><strong>12,400+</strong> registered bidders</span>
+      <span><strong>340</strong> active lots today</span>
+    </div>
+  </section>
+
+  <!-- RIGHT: FORM -->
+  <section class="form-panel">
+    <div class="form-inner">
+
+      <div class="paddle-badge" id="paddleBadge">
+        Your paddle will be <span class="num" id="paddleNum">№ ----</span>
+      </div>
+
+      <div class="form-head">
+        <h2>Register to bid</h2>
+        <p>Already have a paddle? <a href="#">Sign in instead</a></p>
+      </div>
+
+      <form id="registerForm" novalidate>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="firstName"><span class="idx">01</span> First name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Evelyn" required>
+          </div>
+          <div class="field">
+            <label class="field-label" for="lastName"><span class="idx">02</span> Last name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Cross" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="email"><span class="idx">03</span> Email address</label>
+          <input type="email" id="email" name="email" placeholder="evelyn@email.com" required>
+          <div class="field-msg" id="emailMsg"></div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="phone"><span class="idx">04</span> Phone number</label>
+          <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="username"><span class="idx">05</span> Username</label>
+          <input type="text" id="username" name="username" placeholder="Choose a bidder handle" required>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="password"><span class="idx">06</span> Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="password" name="password" placeholder="Minimum 8 characters" required>
+            <button type="button" class="pw-toggle" id="pwToggle">Show</button>
+          </div>
+          <div class="strength" id="strengthBar" data-level="0">
+            <i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="confirmPassword"><span class="idx">07</span> Confirm password</label>
+          <div class="pw-wrap">
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter password" required>
+            <button type="button" class="pw-toggle" id="pwToggle2">Show</button>
+          </div>
+          <div class="field-msg" id="matchMsg"></div>
+        </div>
+
+        <label class="terms">
+          <input type="checkbox" id="terms" name="terms" required>
+          <span>I agree to the <a href="#">bidder terms</a> and confirm all bids placed under my account are binding.</span>
+        </label>
+
+        <button type="submit" class="submit-btn">Reserve my paddle</button>
+      </form>
+
+      <div class="divider">or continue with</div>
+      <div class="signin-line">
+        By registering, you agree to receive outbid notifications by email and SMS.
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // ---------- Floating gold particles ----------
+  (function(){
+    const field = document.getElementById('particleField');
+    if (!field) return;
+    const count = 16;
+    for (let i = 0; i < count; i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
+      p.style.animationDuration = (7 + Math.random() * 8) + 's';
+      p.style.animationDelay = (Math.random() * 10) + 's';
+      field.appendChild(p);
+    }
+  })();
+
+  // ---------- Staggered hero reveal ----------
+  (function(){
+    const items = document.querySelectorAll('.reveal');
+    items.forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), 140 * i + 80);
+    });
+  })();
+
+  // ---------- Cursor spotlight ----------
+  (function(){
+    const panel = document.getElementById('showcasePanel');
+    if (!panel) return;
+    panel.addEventListener('mousemove', (e) => {
+      const rect = panel.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      panel.style.setProperty('--mx', x + '%');
+      panel.style.setProperty('--my', y + '%');
+    });
+  })();
+
+  // ---------- Live lot ticket: amount + countdown animation ----------
+  (function(){
+    let amount = 4200;
+    const amountEl = document.getElementById('tickerAmount');
+    setInterval(() => {
+      amount += Math.floor(Math.random() * 3) * 50;
+      amountEl.textContent = '$' + amount.toLocaleString();
+    }, 3200);
+
+    let seconds = 161;
+    const timerEl = document.getElementById('tickerTimer');
+    setInterval(() => {
+      seconds = seconds > 0 ? seconds - 1 : 161;
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      timerEl.textContent = `${m}:${s}`;
+    }, 1000);
+  })();
+
+  // ---------- Paddle number reveal on first interaction ----------
+  (function(){
+    const badge = document.getElementById('paddleBadge');
+    const num = document.getElementById('paddleNum');
+    let revealed = false;
+    const form = document.getElementById('registerForm');
+    form.addEventListener('input', () => {
+      if (!revealed) {
+        revealed = true;
+        const paddle = Math.floor(1000 + Math.random() * 8999);
+        num.textContent = '№ ' + paddle;
+        badge.classList.add('show');
+      }
+    }, { once: false });
+  })();
+
+  // ---------- Password show/hide ----------
+  function wireToggle(toggleId, inputId){
+    const btn = document.getElementById(toggleId);
+    const input = document.getElementById(inputId);
+    btn.addEventListener('click', () => {
+      const isPw = input.type === 'password';
+      input.type = isPw ? 'text' : 'password';
+      btn.textContent = isPw ? 'Hide' : 'Show';
+    });
+  }
+  wireToggle('pwToggle', 'password');
+  wireToggle('pwToggle2', 'confirmPassword');
+
+  // ---------- Password strength ----------
+  const pwInput = document.getElementById('password');
+  const strengthBar = document.getElementById('strengthBar');
+  pwInput.addEventListener('input', () => {
+    const v = pwInput.value;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    strengthBar.setAttribute('data-level', v.length ? score : 0);
+  });
+
+  // ---------- Confirm password match ----------
+  const confirmInput = document.getElementById('confirmPassword');
+  const matchMsg = document.getElementById('matchMsg');
+  function checkMatch(){
+    if (!confirmInput.value){ matchMsg.textContent = ''; confirmInput.classList.remove('invalid'); return; }
+    if (confirmInput.value === pwInput.value){
+      matchMsg.textContent = 'Passwords match';
+      matchMsg.classList.add('ok');
+      confirmInput.classList.remove('invalid');
+    } else {
+      matchMsg.textContent = 'Passwords do not match';
+      matchMsg.classList.remove('ok');
+      confirmInput.classList.add('invalid');
+    }
+  }
+  confirmInput.addEventListener('input', checkMatch);
+  pwInput.addEventListener('input', checkMatch);
+
+  // ---------- Email basic validation ----------
+  const emailInput = document.getElementById('email');
+  const emailMsg = document.getElementById('emailMsg');
+  emailInput.addEventListener('blur', () => {
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value);
+    if (!emailInput.value){ emailMsg.textContent=''; emailInput.classList.remove('invalid'); return; }
+    if (ok){
+      emailMsg.textContent = '';
+      emailInput.classList.remove('invalid');
+    } else {
+      emailMsg.textContent = 'Enter a valid email address';
+      emailInput.classList.add('invalid');
+    }
+  });
+
+  // ---------- Form submit ----------
+  document.getElementById('registerForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    checkMatch();
+    const ok = this.checkValidity() && confirmInput.value === pwInput.value;
+    if (!ok){
+      this.reportValidity();
+      return;
+    }
+    const btn = this.querySelector('.submit-btn');
+    const original = btn.textContent;
+    btn.textContent = 'Creating your account…';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = 'Welcome — redirecting…';
+      // In the Flask app, this is where you'd submit the form data
+      // to your /register route, e.g. this.submit() or a fetch() POST.
+    }, 900);
+  });
+</script>
+
+</body>
+</html>
